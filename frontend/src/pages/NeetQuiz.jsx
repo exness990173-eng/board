@@ -33,6 +33,7 @@ export default function NeetQuiz() {
     getQuiz(quizId).then((q) => {
       setQuiz(q);
       setTimeLeft((q.duration_min || 195) * 60);
+      if (q.subjects?.length) setSubFilter(q.subjects[0]);
     }).catch(() => setQuiz({ error: true }));
   }, [quizId]);
 
@@ -59,7 +60,7 @@ export default function NeetQuiz() {
   const subjects = quiz?.subjects || [];
 
   const filtered = useMemo(() => {
-    if (subFilter === "All") return questions.map((q, i) => ({ q, i }));
+    if (!subFilter || subFilter === "All") return questions.map((q, i) => ({ q, i }));
     return questions.map((q, i) => ({ q, i })).filter(({ q }) => q.subject === subFilter);
   }, [questions, subFilter]);
 
@@ -130,7 +131,7 @@ export default function NeetQuiz() {
                 </div>
               </div>
 
-              <button onClick={() => { setReview(true); setCur(0); setSubFilter("All"); }} className="mt-4 w-full rounded-xl bg-[#312E81] py-3 text-sm font-bold text-white transition-all hover:bg-[#3730A3]">
+              <button onClick={() => { setReview(true); setCur(0); setSubFilter(subjects[0] || ""); }} className="mt-4 w-full rounded-xl bg-[#312E81] py-3 text-sm font-bold text-white transition-all hover:bg-[#3730A3]">
                 Review Answers
               </button>
             </>
@@ -166,10 +167,10 @@ export default function NeetQuiz() {
         {/* Question column */}
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            {["All", ...subjects].map((s) => (
+            {subjects.map((s) => (
               <button
                 key={s}
-                onClick={() => { setSubFilter(s); const f = s === "All" ? 0 : questions.findIndex((qq) => qq.subject === s); if (f >= 0) setCur(f); }}
+                onClick={() => { setSubFilter(s); const f = questions.findIndex((qq) => qq.subject === s); if (f >= 0) setCur(f); }}
                 className={`rounded-full px-3 py-1.5 text-xs font-bold transition-all ${subFilter === s ? "bg-[#5B50E6] text-white" : "border border-slate-200 bg-white text-slate-600"}`}
               >
                 {s}
