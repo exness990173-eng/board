@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { X, RotateCcw } from "lucide-react";
 
 const MIN = 1;
 const MAX = 5;
@@ -127,20 +127,6 @@ export default function ImageZoomModal({ src, alt, onClose }) {
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-xs font-bold uppercase tracking-wide text-white/70">{alt}</span>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => zoomBy(-0.5)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-            aria-label="Zoom out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => zoomBy(0.5)}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-            aria-label="Zoom in"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </button>
           <button
             onClick={reset}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"

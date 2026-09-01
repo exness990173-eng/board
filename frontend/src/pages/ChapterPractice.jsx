@@ -89,6 +89,26 @@ export default function ChapterPractice() {
     getChapterBank(bankKey).then(setBank).catch(() => setError(true));
   }, [bankKey]);
 
+  // Prefetch adjacent questions' images in advance so Next/Previous is instant
+  // (no more waiting for the image to download only after you navigate).
+  useEffect(() => {
+    if (!bank || !openTopic) return;
+    const sec = bank.sections.find((s) => s.topic === openTopic);
+    if (!sec) return;
+    const sorted = [...sec.questions].sort((a, b) => (a.similarity_tag || "").localeCompare(b.similarity_tag || "", undefined, { numeric: true }));
+    const working = activeTag === "All" ? sorted : sorted.filter((q) => q.similarity_tag === activeTag);
+    const total = working.length;
+    const idx = Math.min(curIdx, total - 1);
+    // Warm the browser cache for the next two and the previous question.
+    [working[idx + 1], working[idx + 2], working[idx - 1]].filter(Boolean).forEach((q) => {
+      const urls = [q.question_image, q.solution_image, ...Object.values(q.option_images || {})].filter(Boolean);
+      urls.forEach((u) => {
+        const img = new Image();
+        img.src = chapterImageUrl(u);
+      });
+    });
+  }, [bank, openTopic, activeTag, curIdx]);
+
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
@@ -121,11 +141,13 @@ export default function ChapterPractice() {
       />
 
       <main className="mx-auto max-w-3xl px-4 py-6 md:px-6">
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-extrabold text-white">{bank.source || "PYQs"}</span>
-          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">{bank.total_questions} questions</span>
-          <span className="ml-auto text-xs font-medium text-slate-400">Chapter {bank.chapter_no}</span>
-        </div>
+        {!openTopic && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-extrabold text-white">{bank.source || "PYQs"}</span>
+            <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">{bank.total_questions} questions</span>
+            <span className="ml-auto text-xs font-medium text-slate-400">Chapter {bank.chapter_no}</span>
+          </div>
+        )}
 
         {/* Topic list (tap to open) */}
         {!openTopic ? (
@@ -164,11 +186,6 @@ export default function ChapterPractice() {
             const idx = Math.min(curIdx, total - 1);
             return (
             <section key={sec.topic}>
-              <div className="mb-3 flex items-center gap-2">
-                <Layers className="h-4 w-4 text-blue-600" />
-                <h2 className="text-sm font-extrabold uppercase tracking-wide text-slate-700">{sec.topic}</h2>
-                <span className="ml-auto rounded-md bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700">Question {idx + 1} of {total}</span>
-              </div>
 
               {/* Similarity-tag groups */}
               {tags.length > 2 && (
