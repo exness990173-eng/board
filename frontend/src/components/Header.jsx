@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GraduationCap, ArrowLeft } from "lucide-react";
 
-export const Header = ({ showBack = false, title, Icon, bgClass = "bg-blue-600" }) => {
+export const Header = ({ showBack = false, title, Icon, bgClass = "bg-blue-600", onBack }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,7 +31,7 @@ export const Header = ({ showBack = false, title, Icon, bgClass = "bg-blue-600" 
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-8">
           <button
             data-testid="header-back-btn"
-            onClick={goBack}
+            onClick={() => (onBack ? onBack(goBack) : goBack())}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white transition-colors hover:bg-white/20"
           >
             <ArrowLeft className="h-4 w-4" />

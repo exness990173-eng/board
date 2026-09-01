@@ -109,7 +109,16 @@ export default function ChapterPractice() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Header showBack title={bank.chapter} Icon={Atom} bgClass="bg-blue-600" />
+      <Header
+        showBack
+        title={bank.chapter}
+        Icon={Atom}
+        bgClass="bg-blue-600"
+        onBack={(goBack) => {
+          if (openTopic) { setOpenTopic(null); window.scrollTo(0, 0); }
+          else goBack();
+        }}
+      />
 
       <main className="mx-auto max-w-3xl px-4 py-6 md:px-6">
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -146,13 +155,6 @@ export default function ChapterPractice() {
           </div>
         ) : (
           <>
-            <button
-              onClick={() => { setOpenTopic(null); window.scrollTo(0, 0); }}
-              className="mb-4 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-600 transition-all hover:border-slate-300"
-            >
-              <ChevronLeft className="h-4 w-4" /> All Topics
-            </button>
-
             <div className="space-y-6">
           {(activeSection ? [activeSection] : []).map((sec) => {
             const sorted = [...sec.questions].sort((a, b) => (a.similarity_tag || "").localeCompare(b.similarity_tag || "", undefined, { numeric: true }));
