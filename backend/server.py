@@ -444,6 +444,26 @@ async def get_chapter_bank(bank_key: str):
     return {**bank, "total_questions": total}
 
 
+# ---------------- Full-paper (with solutions) image banks ----------------
+FULL_PAPERS = {}
+_fp_file = ROOT_DIR / "reexam_solutions.json"
+if _fp_file.exists():
+    try:
+        _fp = _json.loads(_fp_file.read_text())
+        FULL_PAPERS[_fp["id"]] = _fp
+        logger.info(f"Loaded full paper '{_fp['id']}' with {len(_fp['questions'])} questions")
+    except Exception as _e:
+        logger.warning(f"Failed loading full paper: {_e}")
+
+
+@api_router.get("/full-paper/{paper_id}")
+async def get_full_paper(paper_id: str):
+    paper = FULL_PAPERS.get(paper_id)
+    if not paper:
+        raise HTTPException(status_code=404, detail="Full paper not found")
+    return paper
+
+
 class ChapterQuestionEdit(BaseModel):
     question: Optional[str] = None
     options: Optional[dict] = None      # {"a": "...", "b": "...", ...}

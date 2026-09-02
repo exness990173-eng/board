@@ -16,6 +16,7 @@ import ExamChapters from "@/pages/ExamChapters";
 import ExamPapers from "@/pages/ExamPapers";
 import NeetQuiz from "@/pages/NeetQuiz";
 import ChapterPractice from "@/pages/ChapterPractice";
+import FullPaperSolutions from "@/pages/FullPaperSolutions";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/exam/:examId" element={<ExamDashboard />} />
             <Route path="/exam/:examId/papers" element={<ExamPapers />} />
           <Route path="/exam/:examId/quiz/:quizId" element={<NeetQuiz />} />
+          <Route path="/exam/:examId/paper/:paperId/solutions" element={<FullPaperSolutions />} />
           <Route path="/exam/:examId/:subjectId/practice/:bankKey" element={<ChapterPractice />} />
             <Route path="/exam/:examId/:subjectId/chapters" element={<ExamChapters />} />
             <Route path="/exam/:examId/:subjectId/chapters/:cls" element={<ExamChapters />} />

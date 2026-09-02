@@ -27,3 +27,5 @@ export const chapterImageUrl = (filename) => `${API}/chapter-image/${filename}?v
 export const getChapterBank = (bankKey) => client.get(`/chapter-bank/${bankKey}`).then((r) => r.data);
 export const editChapterQuestion = (bankKey, questionNo, payload) =>
   client.put(`/chapter-bank/${bankKey}/question/${questionNo}`, payload).then((r) => r.data);
+
+export const getFullPaper = (paperId) => client.get(`/full-paper/${paperId}`).then((r) => r.data);

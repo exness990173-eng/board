@@ -12,7 +12,7 @@ const EXAM_META = {
 const PAPERS_BY_EXAM = {
   neet: [
     { year: 2026, items: [
-      { name: "RE-NEET 2026", date: "21st June 2026 at 2:00 PM", quiz: "reexam-2026" },
+      { name: "RE-NEET 2026", date: "21st June 2026 at 2:00 PM", quiz: "reexam-2026", solutions: "reexam-2026" },
       { name: "NEET 2026", date: "3rd May 2026 at 2:00 PM" },
     ] },
     { year: 2025, items: [{ name: "NEET 2025", date: "4th May 2025 at 2:00 PM" }] },
@@ -166,12 +166,21 @@ export default function ExamPapers() {
                         >
                           Take Test
                         </button>
-                        <button
-                          onClick={soon}
-                          className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 py-2 text-sm font-bold text-[#5B50E6] transition-all hover:bg-indigo-100"
-                        >
-                          Practice
-                        </button>
+                        {p.solutions ? (
+                          <button
+                            onClick={() => navigate(`/exam/${examId}/paper/${p.solutions}/solutions`)}
+                            className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 py-2 text-sm font-bold text-[#5B50E6] transition-all hover:bg-indigo-100"
+                          >
+                            View Solutions
+                          </button>
+                        ) : (
+                          <button
+                            onClick={soon}
+                            className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 py-2 text-sm font-bold text-[#5B50E6] transition-all hover:bg-indigo-100"
+                          >
+                            Practice
+                          </button>
+                        )}
                       </div>
                     )}
                     <div className="mt-2">

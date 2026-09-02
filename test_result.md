@@ -129,6 +129,21 @@ backend:
         agent: "testing"
         comment: "Backend API endpoint /api/chapter-bank/{bank_key} tested successfully. Returns valid JSON with chapter data, questions, and image references. Tested with 'neet-physics-motion-in-a-straight-line' bank."
 
+  - task: "Full Paper (with solutions) API endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "NEW: Added GET /api/full-paper/{paper_id} serving RE-NEET 2026 full-paper-with-solutions bank loaded from reexam_solutions.json (180 questions, subjects Physics/Chemistry/Biology, each with question_image + solution_image + answer letter). Images served by existing /api/chapter-image/{filename} (files reexam2026_q{N}_q.png and _s.png in chapter_images). Please verify: (1) GET /api/full-paper/reexam-2026 returns 200 with total_questions=180, subjects list, and each question has question_image, solution_image, subject, answer (4 questions have answer=null for bonus/no-option: Q2,114,150,174). (2) GET /api/full-paper/nonexistent returns 404. (3) Spot-check that referenced images (e.g. reexam2026_q1_q.png, reexam2026_q1_s.png, reexam2026_q180_q.png) return 200 image/png via /api/chapter-image/{filename}."
+      - working: true
+        agent: "testing"
+        comment: "VERIFIED: Full Paper API endpoint tested successfully via backend_test.py. All requirements met: (1) GET /api/full-paper/reexam-2026 returns HTTP 200 with correct JSON structure - id='reexam-2026', total_questions=180, subjects=['Physics','Chemistry','Biology'], questions array with 180 items each containing question_no, subject, question_image, solution_image, answer fields. (2) Subject distribution verified: 45 Physics (Q1-45), 45 Chemistry (Q46-90), 90 Biology (Q91-180). (3) Bonus questions verified: exactly 4 questions with answer=null at Q2, Q114, Q150, Q174. Remaining 176 questions have valid answer letters (a/b/c/d). (4) GET /api/full-paper/does-not-exist returns HTTP 404 as expected. (5) Image endpoints spot-checked: reexam2026_q1_q.png, reexam2026_q1_s.png, reexam2026_q91_q.png, reexam2026_q180_q.png, reexam2026_q180_s.png all return HTTP 200 with content-type image/png via /api/chapter-image/{filename}. (6) Sanity checks passed: GET /api/quiz/reexam-2026 returns 200 with 180 questions, GET /api/subjects returns 200 with 9 subjects. All 33 test assertions passed."
+
 frontend:
   - task: "Chapter Practice image prefetch implementation"
     implemented: true
@@ -169,12 +184,25 @@ frontend:
 metadata:
   created_by: "testing_agent"
   version: "1.0"
-  test_sequence: 1
+  test_sequence: 2
   run_ui: true
+
+frontend_new:
+  - task: "Full Paper Solutions viewer with LaTeX (always) + image fallback"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/FullPaperSolutions.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "NEW viewer at /exam/neet/paper/reexam-2026/solutions. Reached via NEET -> Full Paper -> RE-NEET 2026 'View Solutions' button (RE-NEET is first; 'Take Test' stays answer-free). Renders each question as reflowing KaTeX LaTeX ALWAYS (question_latex + options_latex a-d with letter badges) via MathText.jsx; falls back to the cropped question_image when question_has_diagram is true or latex is missing. 'Show Answer & Solution' reveals 'Answer · X' (or 'Bonus / No option' for Q2,114,150,174) plus explanation_latex, falling back to solution_image when solution_has_diagram. Subject tabs Physics/Chemistry/Biology (no All), Prev/Next, tap-to-zoom on image-mode parts. NOTE: main agent could not verify interactions via the screenshot tool because the preview visual-edits overlay intercepts clicks; needs the testing agent (which handles the overlay). Verify: (1) View Solutions button navigates to viewer, (2) Q1 renders as LaTeX text with 4 option rows, (3) subject tabs switch questions, (4) Next/Previous work, (5) reveal shows LaTeX solution for text questions and image for diagram ones (e.g., check a question where question_has_diagram true shows an image), (6) tap-to-zoom works on image-mode question/solution."
 
 test_plan:
   current_focus:
-    - "All tasks tested and verified"
+    - "All backend tasks tested and verified"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -182,3 +210,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Completed comprehensive testing of Chapter Practice image prefetch bug fix. All backend APIs working correctly. Frontend prefetch implementation verified with Playwright browser testing. Images load instantly when navigating (0.56-0.71s), no visible delays. UI cleanup verified: no 'All Topics' button, meta bar removed, back arrow navigation working. All 40 image requests successful, 0 console errors. Bug fix is working as intended."
+  - agent: "testing"
+    message: "NEW ENDPOINT TESTING COMPLETE: Full Paper API endpoint (GET /api/full-paper/{paper_id}) tested and verified working correctly. Comprehensive backend test suite created at /app/backend_test.py with 33 test assertions covering: (1) Valid paper retrieval with correct JSON structure, (2) Paper metadata validation (id, total_questions, subjects), (3) Questions array structure with all required fields, (4) Subject distribution (45 Physics, 45 Chemistry, 90 Biology), (5) Bonus questions with null answers (Q2, Q114, Q150, Q174), (6) 404 response for invalid paper IDs, (7) Image endpoint accessibility for question and solution images, (8) Sanity checks for existing quiz and subjects endpoints. All tests passed successfully. Backend implementation is production-ready."
