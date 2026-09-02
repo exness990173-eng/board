@@ -2,11 +2,38 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getFullPaper, chapterImageUrl } from "@/lib/api";
 import { Header } from "@/components/Header";
-import { Stethoscope, Loader2, CheckCircle2, Eye, Maximize2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Stethoscope, Loader2, CheckCircle2, Eye, Maximize2, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import ImageZoomModal from "@/components/ImageZoomModal";
 import MathText from "@/components/MathText";
 
 const LETTERS = ["a", "b", "c", "d"];
+
+function FigureBlock({ open, onToggle, src, alt, onZoom, emerald }) {
+  const tone = emerald
+    ? "border-emerald-200 bg-white text-emerald-700 hover:border-emerald-400"
+    : "border-indigo-200 bg-indigo-50 text-[#5B50E6] hover:border-indigo-300";
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-all ${tone}`}
+      >
+        <ImageIcon className="h-3.5 w-3.5" /> {open ? "Hide figure" : "View figure"}
+      </button>
+      {open && (
+        <button
+          type="button"
+          onClick={onZoom}
+          className="mt-2 block w-full overflow-hidden rounded-xl border border-slate-100 bg-white text-left"
+          title="Tap to zoom"
+        >
+          <img src={src} alt={alt} className="mx-auto block h-auto w-full max-w-full" loading="lazy" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function FullPaperSolutions() {
   const { paperId = "reexam-2026" } = useParams();
@@ -15,6 +42,7 @@ export default function FullPaperSolutions() {
   const [subject, setSubject] = useState(null);
   const [idx, setIdx] = useState(0);
   const [revealed, setRevealed] = useState({}); // { question_no: true }
+  const [figs, setFigs] = useState({}); // { "qno-q" | "qno-s": true }
   const [zoom, setZoom] = useState(null);
 
   useEffect(() => {
@@ -62,8 +90,8 @@ export default function FullPaperSolutions() {
 
   const show = revealed[q.question_no];
   const answerLabel = q.answer ? q.answer.toUpperCase() : "Bonus / No option";
-  const qUseLatex = !!q.question_latex && !q.question_has_diagram;
-  const solUseLatex = !!q.explanation_latex && !q.solution_has_diagram;
+  const qUseLatex = !!q.question_latex;
+  const solUseLatex = !!q.explanation_latex;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -126,6 +154,15 @@ export default function FullPaperSolutions() {
                   );
                 })}
               </div>
+              {q.question_has_diagram && q.question_image && (
+                <FigureBlock
+                  open={figs[`${q.question_no}-q`]}
+                  onToggle={() => setFigs((f) => ({ ...f, [`${q.question_no}-q`]: !f[`${q.question_no}-q`] }))}
+                  src={chapterImageUrl(q.question_image)}
+                  alt={`Question ${q.question_no} figure`}
+                  onZoom={() => setZoom({ src: chapterImageUrl(q.question_image), alt: `Question ${q.question_no}` })}
+                />
+              )}
             </>
           ) : q.question_image ? (
             <button
@@ -168,9 +205,21 @@ export default function FullPaperSolutions() {
                 )}
               </p>
               {solUseLatex ? (
-                <MathText className="block whitespace-pre-line text-sm leading-relaxed text-slate-700">
-                  {q.explanation_latex}
-                </MathText>
+                <>
+                  <MathText className="block whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                    {q.explanation_latex}
+                  </MathText>
+                  {q.solution_has_diagram && q.solution_image && (
+                    <FigureBlock
+                      open={figs[`${q.question_no}-s`]}
+                      onToggle={() => setFigs((f) => ({ ...f, [`${q.question_no}-s`]: !f[`${q.question_no}-s`] }))}
+                      src={chapterImageUrl(q.solution_image)}
+                      alt={`Solution ${q.question_no} figure`}
+                      onZoom={() => setZoom({ src: chapterImageUrl(q.solution_image), alt: `Solution ${q.question_no}` })}
+                      emerald
+                    />
+                  )}
+                </>
               ) : q.solution_image ? (
                 <button
                   type="button"
